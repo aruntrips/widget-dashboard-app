@@ -113,6 +113,7 @@ src/app/
 ## Extending it
 
 To add a new widget type:
+
 1. Create `src/app/widgets/my-widget/my-widget.component.ts` implementing `WidgetConfig` as its
    `@Input()`.
 2. Add one line to `register-widgets.ts`:
