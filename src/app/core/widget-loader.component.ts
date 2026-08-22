@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Type, effect, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Type, effect, inject, input, signal } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { WidgetRegistryService } from './widget-registry.service';
 import { WidgetConfig } from './models/widget-config.model';
@@ -34,8 +34,9 @@ export class WidgetLoaderComponent {
 
   componentType = signal<Type<unknown> | undefined>(undefined);
   notFound = signal(false);
+  private registry = inject(WidgetRegistryService);
 
-  constructor(private registry: WidgetRegistryService) {
+  constructor() {
     // Re-resolves whenever `config()` (specifically its type) changes,
     // replacing the old ngOnChanges lifecycle hook.
     effect(() => {

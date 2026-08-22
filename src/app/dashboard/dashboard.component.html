@@ -3,9 +3,9 @@
     <h1>Widget Dashboard</h1>
 
     <div class="dashboard-controls">
-      <label>
+      <label for="region-select">
         Region:
-        <select (change)="onRegionChange($event)">
+        <select id="region-select" (change)="onRegionChange($event)">
           <option value="">All</option>
           <option value="north">North</option>
           <option value="south">South</option>

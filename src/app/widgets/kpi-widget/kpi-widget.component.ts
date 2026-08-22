@@ -97,13 +97,23 @@ export class KpiWidgetComponent {
       }
     });
 
-    // Refetch whenever shared filters change (region/category)
+    let initialized = false;
     effect(() => {
       const region = this.state.activeRegion();
       const cfg = this.config();
-      if (cfg) {
-        this.fetchData(cfg.id, region);
+      if (!cfg) {
+        return;
       }
+
+      // Preserve data supplied by the dashboard on the initial render.
+      if (!initialized) {
+        initialized = true;
+        if (cfg.data || this.entry()?.status === 'success') {
+          return;
+        }
+      }
+
+      this.fetchData(cfg.id, region);
     });
   }
 

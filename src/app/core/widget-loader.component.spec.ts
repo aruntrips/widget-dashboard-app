@@ -1,9 +1,13 @@
 import { TestBed } from '@angular/core/testing';
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { WidgetLoaderComponent } from './widget-loader.component';
 import { WidgetRegistryService } from './widget-registry.service';
 
-@Component({ selector: 'fake-widget', template: '<span>fake widget rendered</span>' })
+@Component({
+  selector: 'app-fake-widget',
+  template: '<span>fake widget rendered</span>',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
 class FakeWidgetComponent {
   config = input<unknown>();
 }

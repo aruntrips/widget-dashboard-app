@@ -35,7 +35,7 @@ interface TableRow {
               <tr [class.highlighted]="row.month === highlightedMonth()">
                 <td>{{ row.month }}</td>
                 <td>{{ row.orders }}</td>
-                <td>${{ row.revenue }}</td>
+                <td>$ {{ row.revenue }}</td>
               </tr>
             }
           </tbody>

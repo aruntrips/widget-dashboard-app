@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { WidgetRegistryService } from './widget-registry.service';
 
-@Component({ selector: 'fake-widget', template: 'fake' })
+@Component({ selector: 'app-fake-widget', template: 'fake', changeDetection: ChangeDetectionStrategy.OnPush })
 class FakeWidgetComponent {}
 
 describe('WidgetRegistryService', () => {
