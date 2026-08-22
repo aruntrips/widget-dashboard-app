@@ -1,0 +1,27 @@
+<div class="dashboard">
+  <header class="dashboard-header">
+    <h1>Widget Dashboard</h1>
+
+    <div class="dashboard-controls">
+      <label>
+        Region:
+        <select (change)="onRegionChange($event)">
+          <option value="">All</option>
+          <option value="north">North</option>
+          <option value="south">South</option>
+          <option value="emea">EMEA</option>
+        </select>
+      </label>
+
+      <button type="button" (click)="toggleTheme()">
+        {{ theme() === 'light' ? '🌙 Dark mode' : '☀️ Light mode' }}
+      </button>
+    </div>
+  </header>
+
+  <section class="dashboard-grid">
+    @for (widget of widgets(); track widget.id) {
+      <app-widget-loader [config]="widget" />
+    }
+  </section>
+</div>

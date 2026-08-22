@@ -1,0 +1,48 @@
+/* ===== Global design tokens (shared source of truth for all widgets) ===== */
+:root {
+  --color-primary: #4f46e5;
+  --color-primary-contrast: #ffffff;
+  --color-danger: #dc2626;
+  --color-success: #16a34a;
+
+  --color-bg: #ffffff;
+  --color-surface: #f8f9fb;
+  --color-text: #1a1a1a;
+  --color-text-muted: #6b7280;
+
+  --spacing-unit: 8px;
+  --radius-md: 10px;
+  --font-family-base: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* semantic aliases widgets should consume (never raw palette values) */
+  --widget-bg: var(--color-surface);
+  --widget-border: #e5e7eb;
+  --widget-title-color: var(--color-text);
+  --widget-muted-color: var(--color-text-muted);
+  --widget-padding: calc(var(--spacing-unit) * 2);
+  --widget-accent: var(--color-primary);
+  --widget-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='dark'] {
+  --color-bg: #0f0f10;
+  --color-surface: #1b1b1e;
+  --color-text: #f1f1f1;
+  --color-text-muted: #9ca3af;
+  --widget-border: #2e2e30;
+  --widget-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family-base);
+  transition: background 0.2s ease, color 0.2s ease;
+}
