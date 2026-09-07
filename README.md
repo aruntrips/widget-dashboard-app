@@ -4,6 +4,8 @@ A working Angular (v20, standalone components + signal inputs) scaffold demonstr
 **widget/dynamic-registry architecture**: a shell app that renders pluggable, lazily-loaded
 widgets from a config array, with shared cross-widget state and CSS-token-based theming.
 
+This started as a monorepo restructuring exercise, then became something more useful: a self-contained reference for how a widget-based Angular architecture — dynamic registry, lazy-loaded widgets, shared state via signals, CSS-token theming — should actually be built and upgraded. It's also a live example of the v18→v20 migration and CI/CD practices described in my modernization work.
+
 ## Setup
 
 This was built without network access, so `node_modules` isn't included. From the project root:
