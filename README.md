@@ -1,131 +1,159 @@
 # Widget Dashboard App
 
-A working Angular (v20, standalone components + signal inputs) scaffold demonstrating the
-**widget/dynamic-registry architecture**: a shell app that renders pluggable, lazily-loaded
-widgets from a config array, with shared cross-widget state and CSS-token-based theming.
+A working Angular 20 application demonstrating a **widget-based dynamic registry architecture**: a shell app renders pluggable, lazily loaded widgets from configuration, with shared cross-widget state and CSS-token-based theming.
 
-This started as a monorepo restructuring exercise, then became something more useful: a self-contained reference for how a widget-based Angular architecture — dynamic registry, lazy-loaded widgets, shared state via signals, CSS-token theming — should actually be built and upgraded. It's also a live example of the v18→v20 migration and CI/CD practices described in my modernization work.
+The project combines two related concerns:
+
+* a reference implementation of a widget-based Angular architecture
+* a practical study of the changes involved in moving that application from Angular 18 to Angular 20
+
+The widget architecture provides the real application context for the upgrade work, while the upgrade provides a concrete example of how modern Angular APIs and conventions affect an existing application.
 
 ## Setup
 
-This was built without network access, so `node_modules` isn't included. From the project root:
+From the project root:
 
 ```bash
 npm install
 npm start        # serves on http://localhost:4200
-npm test         # runs unit tests (Karma + Jasmine)
+npm test         # runs unit tests
 npm run lint     # ESLint + angular-eslint
 npm run format   # Prettier, writes changes
 ```
 
-Requires Node 20.11+ / 22+ and npm 10+ (Angular 20's minimum supported Node baseline).
+Requires Node 20.11+ or 22+ and npm 10+.
 
 ## CI/CD
 
-A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs on every push/PR to
-`main`:
+A GitHub Actions pipeline (`.github/workflows/ci.yml`) runs on every push and pull request to `main`.
 
-1. **Lint & format** — `eslint .` (with `angular-eslint`'s recommended +
-   template-accessibility rules) and `prettier --check .`
-2. **Unit tests** — `ng test` in headless Chrome with coverage
-3. **Production build** — only runs once lint and tests pass
+1. **Lint & format** — ESLint, `angular-eslint`, and Prettier
+2. **Unit tests** — Karma/Jasmine in headless Chrome with coverage
+3. **Production build** — runs only after lint and tests pass
 
-This mirrors a real team's quality gate: nothing merges to `main` without
-passing lint, formatting, and tests first — the same setup described in the
-"CI/CD & Code Quality Setup" service line of this project's author.
+The pipeline makes these checks an automated quality gate rather than a local convention.
 
 ## Code quality conventions
 
-- Every component uses `ChangeDetectionStrategy.OnPush` — enforced by an
-  ESLint rule (`@angular-eslint/prefer-on-push-component-change-detection`),
-  not just convention. Combined with signal inputs, this means Angular only
-  re-renders a component when one of its signals actually changes.
-- ESLint config: `eslint.config.js` (flat config, `angular-eslint` +
-  `typescript-eslint` recommended rulesets, plus template accessibility
-  checks).
-- Prettier config: `.prettierrc.json` (single quotes, 110-char print width,
-  Angular HTML parser for template files).
+* Every component uses `ChangeDetectionStrategy.OnPush`, enforced by `@angular-eslint/prefer-on-push-component-change-detection`.
+* ESLint uses the flat configuration with `angular-eslint` and `typescript-eslint`.
+* Template accessibility rules are enabled.
+* Prettier enforces consistent formatting.
 
-Requires Node 20.11+ / 22+ and npm 10+ (Angular 20's minimum supported Node baseline).
+## Notes on the Angular 18 → 20 upgrade
 
-## Notes on the v18 → v20 upgrade
+The repository is published in its Angular 20 state; the public commit history does not attempt to preserve every intermediate Angular major as a separate migration commit.
 
-- All `@angular/*` packages bumped to `^20.0.0`, `zone.js` to `~0.15.0`, `typescript` to `~5.8.0`.
-- `standalone: true` removed from every `@Component` — standalone has been the default since v19,
-  so the flag is now redundant.
-- Every widget's `@Input()` was converted to the signal-based `input()` API (`config = input.required<WidgetConfig>()`),
-  which has been the recommended pattern since v17.1 and is the v20 convention. Templates and
-  internal logic now read `this.config()` instead of `this.config`.
-- `WidgetLoaderComponent` no longer implements `OnChanges` — it uses an `effect()` that reacts to
-  the `config` signal directly, which is the more idiomatic replacement for input-driven lifecycle
-  hooks.
-- Test specs were updated to use `fixture.componentRef.setInput(...)` everywhere (this already
-  works with signal inputs, but the widget-loader spec previously set `fixture.componentInstance.config`
-  directly, which only worked with decorator-based inputs).
+The upgrade work included:
 
-If you'd rather run the actual guided migration schematics locally instead of applying these
-diffs by hand, this is the real command:
+* upgrading the Angular framework and CLI packages to v20
+* updating TypeScript and `zone.js`
+* removing explicit `standalone: true` declarations
+* converting widget inputs from decorator-based `@Input()` to the signal-based `input()` API
+* replacing `OnChanges` handling in `WidgetLoaderComponent` with reactive `effect()` logic
+* updating tests to use `fixture.componentRef.setInput(...)`
+
+The resulting application is therefore useful as a concrete reference for the architectural and code-level changes involved in modernizing an Angular application.
+
+For a project currently on Angular 18, perform the upgrade through the supported intermediate major rather than treating the command below as an 18 → 20 shortcut:
 
 ```bash
+npx @angular/cli@19 update @angular/core@19 @angular/cli@19
 npx @angular/cli@20 update @angular/core@20 @angular/cli@20
 ```
 
-Run it one major version at a time if you're starting from something older than 19
-(`ng update` won't skip majors), and commit between each step so you can bisect if something breaks.
+Commit between major-version upgrades so that changes can be isolated and diagnosed if something breaks.
 
 ## Architecture at a glance
 
-```
+```text
 src/app/
   core/
-    models/widget-config.model.ts   // the WidgetConfig contract every widget implements
-    widget-registry.service.ts      // type -> lazy-loaded component map
-    widget-loader.component.ts      // dynamic host, renders whatever type a config asks for
-    dashboard-state.service.ts      // shared signals: filters, per-widget data cache, selection
-    register-widgets.ts             // one place to register every widget type + its import()
-    theme/theme.service.ts          // runtime light/dark theme switching
+    models/widget-config.model.ts    # WidgetConfig contract
+    widget-registry.service.ts       # widget type → lazy component map
+    widget-loader.component.ts       # dynamic widget host
+    dashboard-state.service.ts       # shared signal-based state
+    register-widgets.ts              # widget registrations + lazy imports
+    theme/theme.service.ts           # runtime theme switching
+
   widgets/
-    kpi-widget/                     // metric card, supports per-instance accent override
-    chart-widget/                   // SVG bar chart, emits selection on bar click
-    table-widget/                   // reacts to another widget's selection, zero direct coupling
+    kpi-widget/                      # metric card
+    chart-widget/                    # SVG bar chart
+    table-widget/                    # selection-aware table
+
   dashboard/
-    dashboard.component.ts          // owns the WidgetConfig[] array, renders via WidgetLoaderComponent
+    dashboard.component.ts            # owns the widget configuration
+
   widget-testing/
-    mock-dashboard-state.ts         // shared stub factory so every widget spec stays consistent
+    mock-dashboard-state.ts          # shared test stub factory
 ```
+
+The important boundary is:
+
+**configuration → registry → lazy widget → shared state**
+
+Individual widgets do not need direct knowledge of one another.
 
 ## What this demonstrates
 
-- **Dynamic widget rendering** — `WidgetLoaderComponent` uses `NgComponentOutlet` + the registry
-  to render any widget type from a plain config object, with each widget type code-split into
-  its own lazy chunk via `import()`.
-- **Cross-widget communication without direct coupling** — click a bar in the chart widget and
-  the table widget highlights the matching row, purely by both reading `DashboardStateService`'s
-  `selection` signal. Neither widget references the other.
-- **Shared, filter-driven refetching** — changing the region dropdown updates a shared `filters`
-  signal; every widget's `effect()` reacts and refetches automatically.
-- **CSS custom-property theming** — every widget consumes semantic tokens (`--widget-bg`,
-  `--widget-accent`, etc.) defined once in `src/styles.css`. Toggling the theme button flips
-  `data-theme` on `<html>`, and every widget re-themes with zero widget-level code. The KPI
-  widgets also show the **per-instance override** pattern via `config.settings.accentColor`.
-- **Isolated, mockable widget tests** — each widget's spec stubs `DashboardStateService` via the
-  shared `createMockDashboardState()` helper rather than depending on the real service, keeping
-  tests fast and widgets testable in isolation.
+### Dynamic widget rendering
+
+`WidgetLoaderComponent` uses `NgComponentOutlet` and the registry to render a widget from configuration.
+
+Each widget type is lazy-loaded through `import()` and can therefore be code-split independently.
+
+### Cross-widget communication without direct coupling
+
+The chart widget updates selection through `DashboardStateService`.
+
+The table widget reacts to the same `selection` signal without referencing the chart widget directly.
+
+### Shared reactive state
+
+Dashboard filters are held in signals. Widgets react to changes in the shared filter state and update their data accordingly.
+
+### CSS-token-based theming
+
+Widgets consume semantic CSS custom properties such as `--widget-bg` and `--widget-accent`.
+
+Changing `data-theme` on `<html>` switches the theme without requiring widget-specific theme logic.
+
+The KPI widget also demonstrates a per-instance styling override through its configuration.
+
+### Isolated widget tests
+
+Widget tests use `createMockDashboardState()` to provide a consistent stub for `DashboardStateService`, keeping individual widgets testable in isolation.
 
 ## Extending it
 
 To add a new widget type:
 
-1. Create `src/app/widgets/my-widget/my-widget.component.ts` implementing `WidgetConfig` as its
-   `@Input()`.
-2. Add one line to `register-widgets.ts`:
-   ```ts
-   registry.registerLazy('my-widget', () =>
-     import('../widgets/my-widget/my-widget.component').then((m) => m.MyWidgetComponent)
-   );
-   ```
-3. Add a `{ id, type: 'my-widget', title }` entry to the `widgets` signal in
-   `dashboard.component.ts` (or, in a real app, return it from your backend's dashboard-layout
-   endpoint).
+1. Create `src/app/widgets/my-widget/my-widget.component.ts` using the `WidgetConfig` contract and signal inputs.
 
-No changes to the dashboard shell or loader are needed.
+2. Register it in `register-widgets.ts`:
+
+```typescript
+registry.registerLazy('my-widget', () =>
+  import('../widgets/my-widget/my-widget.component').then((m) => m.MyWidgetComponent)
+);
+```
+
+3. Add a configuration entry to the dashboard:
+
+```typescript
+{ id: 'widget-4', type: 'my-widget', title: 'My Widget' }
+```
+
+No changes to the dashboard shell or loader are required.
+
+In a production application, the widget configuration could instead come from a backend dashboard-layout endpoint.
+
+## Key takeaway
+
+A widget architecture becomes useful when its boundaries are explicit:
+
+**configuration → registry → lazy widget → shared state**
+
+The dashboard shell does not need to know how individual widgets work, and widgets do not need direct knowledge of one another.
+
+That makes the architecture easier to extend, test, and evolve independently.
