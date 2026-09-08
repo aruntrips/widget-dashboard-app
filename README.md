@@ -55,7 +55,7 @@ The upgrade work included:
 
 The resulting application is therefore useful as a concrete reference for the architectural and code-level changes involved in modernizing an Angular application.
 
-For a project currently on Angular 18, perform the upgrade through the supported intermediate major rather than treating the command below as an 18 → 20 shortcut:
+For a project currently on Angular 18, perform the upgrade through the supported intermediate major rather than treating the commands below as an 18 → 20 shortcut:
 
 ```bash
 npx @angular/cli@19 update @angular/core@19 @angular/cli@19
